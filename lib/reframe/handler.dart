@@ -11,6 +11,8 @@ import 'package:flutter_reframe_sample_app/reframe/event.dart';
 // A side-effect asynchronously resolves to a list of additional Events.
 typedef SideEffect = Future<List<Event>> Function();
 
+Future<List<Event>> noEffect() async => [];
+
 // A HandlerResponse is a description of how the app changes due to an event,
 // i.e. (1) how the state changes and/or (2) which side-effects to run.
 @immutable
@@ -18,10 +20,10 @@ class ReframeResponse<S> {
   final Optional<S> state;
   final SideEffect effect;
 
-  const ReframeResponse(
-      {this.state = const Optional.absent(), this.effect = noopEffect});
-
-  static Future<List<Event>> noopEffect() async => [];
+  const ReframeResponse({
+    this.state = const Optional.absent(),
+    this.effect = noEffect,
+  });
 
   static ReframeResponse<S> stateUpdate<S>(S newState) =>
       ReframeResponse<S>(state: Optional.of(newState));
