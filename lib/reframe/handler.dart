@@ -17,26 +17,26 @@ Future<List<Event>> noEffect() async => [];
 // i.e. (1) how the state changes and/or (2) which side-effects to run.
 @immutable
 class ReframeResponse<S> {
-  final Optional<S> state;
+  final Optional<S> nextState;
   final SideEffect effect;
 
   const ReframeResponse({
-    this.state = const Optional.absent(),
+    this.nextState = const Optional.absent(),
     this.effect = noEffect,
   });
 
   static ReframeResponse<S> stateUpdate<S>(S newState) =>
-      ReframeResponse<S>(state: Optional.of(newState));
+      ReframeResponse<S>(nextState: Optional.of(newState));
 
   static ReframeResponse<S> sideEffect<S>(SideEffect sideEffect) =>
       ReframeResponse<S>(effect: sideEffect);
 
   ReframeResponse<B> map<B>(B Function(S) f) =>
-      ReframeResponse<B>(state: state.transform(f), effect: effect);
+      ReframeResponse<B>(nextState: nextState.transform(f), effect: effect);
 
   @override
   String toString() {
-    return 'ReframeResponse{state: $state, effect: $effect}';
+    return 'ReframeResponse{nextState: $nextState, effect: $effect}';
   }
 
   @override
@@ -44,11 +44,11 @@ class ReframeResponse<S> {
       identical(this, other) ||
       other is ReframeResponse &&
           runtimeType == other.runtimeType &&
-          state == other.state &&
+          nextState == other.nextState &&
           effect == other.effect;
 
   @override
-  int get hashCode => state.hashCode ^ effect.hashCode;
+  int get hashCode => nextState.hashCode ^ effect.hashCode;
 }
 
 typedef Middleware = void Function(Store<AppState>, dynamic, NextDispatcher);
@@ -62,7 +62,7 @@ Middleware reframeMiddleware(Effects effects) =>
         // Handle the event and run resulting state-update and/or side-effects
         event.handle(store.state, effects)
           // StateUpdate will bring the new-state to the reframe-style reducer
-          ..state.ifPresent((newState) => store.dispatch(StateUpdate(newState)))
+          ..nextState.ifPresent((newState) => store.dispatch(StateUpdate(newState)))
           ..effect().then((events) => events.forEach(store.dispatch));
 
       // pass (1) the event to next middleware (e.g. 3rd party middleware)

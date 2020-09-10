@@ -83,3 +83,16 @@ class AsyncSetCountEvent extends Event {
     return ReframeResponse(effect: effect);
   }
 }
+
+@immutable
+class AsyncSetCountEvent2 extends Event {
+  @override
+  ReframeResponse<AppState> handle(AppState state, Effects effects) =>
+      // A side-effect is an async zero-arity function which resolves to a
+      // list of additional actions.
+      ReframeResponse(
+          effect: () => Client()
+              .get('https://jsonplaceholder.typicode.com/posts/1')
+              .then(
+                  (Response response) => [SetCountEvent(response.statusCode)]));
+}

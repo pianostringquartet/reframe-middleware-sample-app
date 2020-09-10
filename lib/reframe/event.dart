@@ -15,7 +15,7 @@ abstract class Event {
 }
 
 // A 'special event' whose only job is to ferry new state to the reframe-reducer.
-// (The only redux-action / reframe-event that our reframe-reducer recognizes.)
+// (The only redux-action/reframe-event that our reframe-reducer recognizes.)
 @immutable
 class StateUpdate<S> {
   final S state;
