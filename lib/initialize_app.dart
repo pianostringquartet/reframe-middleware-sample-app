@@ -13,9 +13,12 @@ Widget initializeApp({
     /* Although Reframe uses only a single 'middleware',
      we can still add 3rd party, non-Reframe middleware to this list,
      e.g. redux-devtools or redux-persist*/
-    reframeMiddleware(Effects(client: client)),
+//    reframeMiddleware(Effects(client: client)),
+    reframeMiddleware<AppState, Effects>(Effects(client: client)),
   ];
-  final store = Store<AppState>(reframeReducer,
-      initialState: AppState(), middleware: middleware);
+  final store = Store<AppState>(
+      reframeReducer, // does this really pick up the type information?
+//      reframeReducer<AppState>,
+      initialState: AppState(), middleware: middleware,);
   return App(store);
 }
