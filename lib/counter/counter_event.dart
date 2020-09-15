@@ -7,14 +7,8 @@ import 'package:flutter_reframe_sample_app/reframe/state.dart';
 import 'package:http/http.dart';
 import 'package:meta/meta.dart';
 
-//typedef CounterHandler = ReframeResponse<CounterState> Function(
-//  CounterState,
-//  Effects,
-//);
-
 /* We often need only a sub-state (e.g. CounterState),
  rather than the full-state (e.g. AppState).
-
 
 //This mixin handles the transition between CounterState <-> AppState.*/
 @immutable
@@ -45,7 +39,6 @@ class IncrementEvent extends Event<AppState, Effects> with CounterHandlerWrapper
         state.copy(count: state.count + 1),
       );
 }
-
 
 // A synchronous action with a payload (as an instance variable).
 @immutable

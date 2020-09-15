@@ -53,9 +53,6 @@ class ReframeResponse<S> {
 
 //typedef Middleware = void Function(Store<AppState>, dynamic, NextDispatcher);
 
-///* Reframe uses a single middleware,
-// which runs the descriptions of state-updates and side-effects
-// returned by an event's handler. */
 //Middleware reframeMiddleware(Effects effects) =>
 //    (Store store, dynamic event, NextDispatcher next) {
 //      if (event is Event)
@@ -65,22 +62,31 @@ class ReframeResponse<S> {
 //          ..nextState.ifPresent((newState) => store.dispatch(StateUpdate(newState)))
 //          ..effect().then((events) => events.forEach(store.dispatch));
 //
-//      // pass (1) the event to next middleware (e.g. 3rd party middleware)
-//      // and (2) a StateUpdate to the reducer
+//       pass (1) the event to next middleware (e.g. 3rd party middleware)
+//       and (2) a StateUpdate to the reducer
 //      next(event);
 //    };
 
+// Type signature required by redux-dart
 typedef Middleware<S> = void Function(Store<S>, dynamic, NextDispatcher);
 
+/* Reframe uses a single middleware,
+ which runs the descriptions of state-updates and side-effects
+ returned by an event's handler. */
 Middleware<S> reframeMiddleware<S, E>(E effects) =>
-        (Store<S> store, dynamic event, NextDispatcher next) {
+    (Store<S> store, dynamic event, NextDispatcher next) {
       if (event is Event)
+        // Handle the event and run resulting state-update and/or side-effects
         event.handle(store.state, effects)
-          ..nextState.ifPresent((newState) => store.dispatch(StateUpdate(newState)))
+          ..nextState
+              // StateUpdate will bring the new-state to the reframe-style reducer
+              .ifPresent((newState) => store.dispatch(StateUpdate(newState)))
           ..effect().then((events) => events.forEach(store.dispatch));
+
+      // pass (1) the event to next middleware (e.g. 3rd party middleware)
+      // and (2) a StateUpdate to the reducer
       next(event);
     };
-
 
 /* Reframe uses a single reducer,
  which exchanges the app's old state for the new state.
@@ -94,7 +100,6 @@ Middleware<S> reframeMiddleware<S, E>(E effects) =>
 
 typedef Reducer<S> = S Function(S, dynamic);
 
-// redux.dart actually types this already!
-// it lookes
+// Type signature required by redux-dart
 S reframeReducer<S>(S state, dynamic event) =>
     event is StateUpdate ? event.state : state;
