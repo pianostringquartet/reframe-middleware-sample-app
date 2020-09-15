@@ -42,9 +42,9 @@ class Counter extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => new Scaffold(
+  Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
-          title: Text("Flutter Reframe Sample App"),
+          title: Text("Reframe-middleware Demo"),
         ),
         body: Center(
           child: Column(
@@ -57,22 +57,31 @@ class Counter extends StatelessWidget {
                 '${state.count}',
                 style: Theme.of(context).textTheme.headline4,
               ),
+              ButtonBar(
+                alignment: MainAxisAlignment.center,
+                children: [
+                  RaisedButton(
+                      color: Colors.blue,
+                      child: const Text('Action'),
+                      onPressed: () {
+                        dispatch(IncrementEvent());
+                      }),
+                  RaisedButton(
+                      color: Colors.blue,
+                      child: const Text('Payload Action'),
+                      onPressed: () {
+                        dispatch(SetCountEvent(3));
+                      }),
+                  RaisedButton(
+                      color: Colors.blue,
+                      child: const Text('Async Action'),
+                      onPressed: () {
+                        dispatch(AsyncSetCountEvent());
+                      })
+                ],
+              )
             ],
           ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            // An action without a payload:
-//            dispatch(IncrementEvent());
-
-            // An action with a payload:
-//          dispatch(SetCountEvent(3));
-
-//             An async action (sends request):
-//          dispatch(AsyncSetCountEvent());
-          },
-          tooltip: 'Increment',
-          child: Icon(Icons.add),
         ),
       );
 }
