@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_reframe_sample_app/app.dart';
-import 'package:flutter_reframe_sample_app/reframe/handler.dart';
-import 'package:flutter_reframe_sample_app/reframe/side_effects.dart';
+import 'package:flutter_reframe_sample_app/reframe/effects.dart';
 import 'package:flutter_reframe_sample_app/reframe/state.dart';
 import 'package:http/http.dart';
 import 'package:redux/redux.dart';
+import 'package:reframe_middleware/reframe_middleware.dart';
 
 Widget initializeApp({
   @required Client client,
@@ -15,7 +15,10 @@ Widget initializeApp({
      e.g. redux-devtools or redux-persist*/
     reframeMiddleware(Effects(client: client)),
   ];
-  final store = Store<AppState>(reframeReducer,
-      initialState: AppState(), middleware: middleware);
+  final store = Store<AppState>(
+    reframeReducer,
+    initialState: AppState(),
+    middleware: middleware,
+  );
   return App(store);
 }

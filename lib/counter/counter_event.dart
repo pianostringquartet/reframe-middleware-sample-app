@@ -1,11 +1,10 @@
 import 'package:flutter_reframe_sample_app/app.dart';
 import 'package:flutter_reframe_sample_app/counter/counter_state.dart';
-import 'package:flutter_reframe_sample_app/reframe/event.dart';
-import 'package:flutter_reframe_sample_app/reframe/handler.dart';
-import 'package:flutter_reframe_sample_app/reframe/side_effects.dart';
+import 'package:flutter_reframe_sample_app/reframe/effects.dart';
 import 'package:flutter_reframe_sample_app/reframe/state.dart';
 import 'package:http/http.dart';
 import 'package:meta/meta.dart';
+import 'package:reframe_middleware/reframe_middleware.dart';
 
 typedef CounterHandler = ReframeResponse<CounterState> Function(
   CounterState,
@@ -28,7 +27,7 @@ mixin HandlerWrapper {
 
 // A simple, synchronous action without a payload.
 @immutable
-class IncrementEvent extends Event with HandlerWrapper {
+class IncrementEvent extends ReframeAction<AppState, Effects> with HandlerWrapper {
   @override
   ReframeResponse<AppState> handle(AppState state, Effects effects) =>
       handleCounterEvent(state, effects, _handle);
@@ -45,7 +44,7 @@ class IncrementEvent extends Event with HandlerWrapper {
 
 // A synchronous action with a payload (as an instance variable).
 @immutable
-class SetCountEvent extends Event with HandlerWrapper {
+class SetCountEvent extends ReframeAction<AppState, Effects> with HandlerWrapper {
   final int number;
 
   const SetCountEvent(this.number);
@@ -63,10 +62,10 @@ class SetCountEvent extends Event with HandlerWrapper {
 
 // An asynchronous action which uses one of our Effects.
 @immutable
-class AsyncSetCountEvent extends Event {
+class AsyncSetCountEvent extends ReframeAction<AppState, Effects> {
   @override
   ReframeResponse<AppState> handle(AppState state, Effects effects) {
-    final List<Event> onFailure = [IncrementEvent()];
+    final List<ReframeAction> onFailure = [IncrementEvent()];
 
     // A side-effect is an async zero-arity function which resolves to a
     // list of additional actions.
@@ -84,15 +83,3 @@ class AsyncSetCountEvent extends Event {
   }
 }
 
-@immutable
-class AsyncSetCountEvent2 extends Event {
-  @override
-  ReframeResponse<AppState> handle(AppState state, Effects effects) =>
-      // A side-effect is an async zero-arity function which resolves to a
-      // list of additional actions.
-      ReframeResponse(
-          effect: () => Client()
-              .get('https://jsonplaceholder.typicode.com/posts/1')
-              .then(
-                  (Response response) => [SetCountEvent(response.statusCode)]));
-}

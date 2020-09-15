@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_reframe_sample_app/counter/counter_event.dart';
 import 'package:flutter_reframe_sample_app/counter/counter_state.dart';
-import 'package:flutter_reframe_sample_app/reframe/event.dart';
 import 'package:flutter_reframe_sample_app/reframe/state.dart';
 import 'package:redux/redux.dart';
+import 'package:reframe_middleware/reframe_middleware.dart';
 
 class App extends StatelessWidget {
   final Store<AppState> store;
@@ -32,7 +32,7 @@ class App extends StatelessWidget {
 }
 
 class Counter extends StatelessWidget {
-  final void Function(Event) dispatch;
+  final void Function(ReframeAction) dispatch;
   final CounterState state;
 
   const Counter({
@@ -63,12 +63,12 @@ class Counter extends StatelessWidget {
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             // An action without a payload:
-            dispatch(IncrementEvent());
+//            dispatch(IncrementEvent());
 
             // An action with a payload:
 //          dispatch(SetCountEvent(3));
 
-            // An async action (sends request):
+//             An async action (sends request):
 //          dispatch(AsyncSetCountEvent());
           },
           tooltip: 'Increment',
