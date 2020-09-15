@@ -1,4 +1,3 @@
-import 'package:flutter_reframe_sample_app/reframe/state.dart';
 import 'package:meta/meta.dart';
 
 @immutable

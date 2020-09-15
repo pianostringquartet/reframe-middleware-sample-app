@@ -64,19 +64,19 @@ class Counter extends StatelessWidget {
                       color: Colors.blue,
                       child: const Text('Action'),
                       onPressed: () {
-                        dispatch(IncrementEvent());
+                        dispatch(IncrementAction());
                       }),
                   RaisedButton(
                       color: Colors.blue,
                       child: const Text('Payload Action'),
                       onPressed: () {
-                        dispatch(SetCountEvent(3));
+                        dispatch(SetCountAction(3));
                       }),
                   RaisedButton(
                       color: Colors.blue,
                       child: const Text('Async Action'),
                       onPressed: () {
-                        dispatch(AsyncSetCountEvent());
+                        dispatch(AsyncSetCountAction());
                       })
                 ],
               )

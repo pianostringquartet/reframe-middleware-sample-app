@@ -16,7 +16,7 @@ typedef CounterHandler = ReframeResponse<CounterState> Function(
 
  This mixin handles the transition between CounterState <-> AppState.*/
 mixin HandlerWrapper {
-  ReframeResponse<AppState> handleCounterEvent(
+  ReframeResponse<AppState> handleCounterAction(
     AppState state,
     Effects effects,
     CounterHandler counterHandler,
@@ -27,10 +27,11 @@ mixin HandlerWrapper {
 
 // A simple, synchronous action without a payload.
 @immutable
-class IncrementEvent extends ReframeAction<AppState, Effects> with HandlerWrapper {
+class IncrementAction extends ReframeAction<AppState, Effects>
+    with HandlerWrapper {
   @override
   ReframeResponse<AppState> handle(AppState state, Effects effects) =>
-      handleCounterEvent(state, effects, _handle);
+      handleCounterAction(state, effects, _handle);
 
 /*  Note: Without mixin and private handle method, we would have:
     ..., Effects effect) => HandlerResponse.stateUpdate(
@@ -44,14 +45,15 @@ class IncrementEvent extends ReframeAction<AppState, Effects> with HandlerWrappe
 
 // A synchronous action with a payload (as an instance variable).
 @immutable
-class SetCountEvent extends ReframeAction<AppState, Effects> with HandlerWrapper {
+class SetCountAction extends ReframeAction<AppState, Effects>
+    with HandlerWrapper {
   final int number;
 
-  const SetCountEvent(this.number);
+  const SetCountAction(this.number);
 
   @override
   ReframeResponse<AppState> handle(AppState state, Effects effects) =>
-      handleCounterEvent(
+      handleCounterAction(
           state,
           effects,
           // Can also define handlers in-line like this:
@@ -62,10 +64,10 @@ class SetCountEvent extends ReframeAction<AppState, Effects> with HandlerWrapper
 
 // An asynchronous action which uses one of our Effects.
 @immutable
-class AsyncSetCountEvent extends ReframeAction<AppState, Effects> {
+class AsyncSetCountAction extends ReframeAction<AppState, Effects> {
   @override
   ReframeResponse<AppState> handle(AppState state, Effects effects) {
-    final List<ReframeAction> onFailure = [IncrementEvent()];
+    final List<ReframeAction> onFailure = [IncrementAction()];
 
     // A side-effect is an async zero-arity function which resolves to a
     // list of additional actions.
@@ -73,7 +75,7 @@ class AsyncSetCountEvent extends ReframeAction<AppState, Effects> {
       try {
         final String url = 'https://jsonplaceholder.typicode.com/posts/1';
         final Response response = await effects.client.get(url);
-        return response.statusCode == 200 ? [SetCountEvent(200)] : onFailure;
+        return response.statusCode == 200 ? [SetCountAction(200)] : onFailure;
       } on Exception catch (exception, _) {
         return onFailure;
       }
@@ -82,4 +84,3 @@ class AsyncSetCountEvent extends ReframeAction<AppState, Effects> {
     return ReframeResponse(effect: effect);
   }
 }
-
