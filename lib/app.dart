@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_reframe_sample_app/counter/counter_event.dart';
 import 'package:flutter_reframe_sample_app/counter/counter_state.dart';
-import 'package:flutter_reframe_sample_app/reframe/event.dart';
 import 'package:flutter_reframe_sample_app/reframe/state.dart';
 import 'package:redux/redux.dart';
+import 'package:reframe_middleware/reframe_middleware.dart';
 
 class App extends StatelessWidget {
   final Store<AppState> store;
@@ -32,7 +32,7 @@ class App extends StatelessWidget {
 }
 
 class Counter extends StatelessWidget {
-  final void Function(Event) dispatch;
+  final void Function(ReframeAction) dispatch;
   final CounterState state;
 
   const Counter({
@@ -42,9 +42,9 @@ class Counter extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => new Scaffold(
+  Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
-          title: Text("Flutter Reframe Sample App"),
+          title: Text("Reframe-middleware Demo"),
         ),
         body: Center(
           child: Column(
@@ -57,22 +57,31 @@ class Counter extends StatelessWidget {
                 '${state.count}',
                 style: Theme.of(context).textTheme.headline4,
               ),
+              ButtonBar(
+                alignment: MainAxisAlignment.center,
+                children: [
+                  RaisedButton(
+                      color: Colors.blue,
+                      child: const Text('Action'),
+                      onPressed: () {
+                        dispatch(IncrementEvent());
+                      }),
+                  RaisedButton(
+                      color: Colors.blue,
+                      child: const Text('Payload Action'),
+                      onPressed: () {
+                        dispatch(SetCountEvent(3));
+                      }),
+                  RaisedButton(
+                      color: Colors.blue,
+                      child: const Text('Async Action'),
+                      onPressed: () {
+                        dispatch(AsyncSetCountEvent());
+                      })
+                ],
+              )
             ],
           ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            // An action without a payload:
-            dispatch(IncrementEvent());
-
-            // An action with a payload:
-//          dispatch(SetCountEvent(3));
-
-            // An async action (sends request):
-//          dispatch(AsyncSetCountEvent());
-          },
-          tooltip: 'Increment',
-          child: Icon(Icons.add),
         ),
       );
 }
