@@ -7,33 +7,30 @@ import 'package:flutter_reframe_sample_app/reframe/state.dart';
 import 'package:http/http.dart';
 import 'package:meta/meta.dart';
 
-typedef CounterHandler = ReframeResponse<CounterState> Function(
-  CounterState,
-  Effects,
-);
-
 /* We often need only a sub-state (e.g. CounterState),
  rather than the full-state (e.g. AppState).
 
- This mixin handles the transition between CounterState <-> AppState.*/
-mixin HandlerWrapper {
-  ReframeResponse<AppState> handleCounterEvent(
+//This mixin handles the transition between CounterState <-> AppState.*/
+@immutable
+mixin CounterHandlerWrapper implements HandlerWrapper<AppState, CounterState, Effects> {
+  @override
+  ReframeResponse<AppState> handlerWrapper(
     AppState state,
     Effects effects,
-    CounterHandler counterHandler,
+    Handler<CounterState, Effects> handler,
   ) =>
-      counterHandler(state.counter, effects).map(
+      handler(state.counter, effects).map(
           (CounterState counterState) => state.copy(counter: counterState));
 }
 
 // A simple, synchronous action without a payload.
 @immutable
-class IncrementEvent extends Event with HandlerWrapper {
+class IncrementEvent extends Event<AppState, Effects> with CounterHandlerWrapper {
   @override
   ReframeResponse<AppState> handle(AppState state, Effects effects) =>
-      handleCounterEvent(state, effects, _handle);
+      handlerWrapper(state, effects, _handle);
 
-/*  Note: Without mixin and private handle method, we would have:
+/*  Note: Without mixin and private _handle method, we would have:
     ..., Effects effect) => HandlerResponse.stateUpdate(
      state.copy(counter: state.counter.copy(count: state.counter.count + 1)));*/
 
@@ -45,17 +42,17 @@ class IncrementEvent extends Event with HandlerWrapper {
 
 // A synchronous action with a payload (as an instance variable).
 @immutable
-class SetCountEvent extends Event with HandlerWrapper {
+class SetCountEvent extends Event<AppState, Effects> with CounterHandlerWrapper {
   final int number;
 
   const SetCountEvent(this.number);
 
   @override
   ReframeResponse<AppState> handle(AppState state, Effects effects) =>
-      handleCounterEvent(
+      handlerWrapper(
           state,
           effects,
-          // Can also define handlers in-line like this:
+          // Can also define handlers in-line:
           (CounterState counter, Effects effects) =>
               // Here we access the payload:
               ReframeResponse.stateUpdate(counter.copy(count: number)));
@@ -63,7 +60,7 @@ class SetCountEvent extends Event with HandlerWrapper {
 
 // An asynchronous action which uses one of our Effects.
 @immutable
-class AsyncSetCountEvent extends Event {
+class AsyncSetCountEvent extends Event<AppState, Effects> {
   @override
   ReframeResponse<AppState> handle(AppState state, Effects effects) {
     final List<Event> onFailure = [IncrementEvent()];
@@ -82,17 +79,4 @@ class AsyncSetCountEvent extends Event {
 
     return ReframeResponse(effect: effect);
   }
-}
-
-@immutable
-class AsyncSetCountEvent2 extends Event {
-  @override
-  ReframeResponse<AppState> handle(AppState state, Effects effects) =>
-      // A side-effect is an async zero-arity function which resolves to a
-      // list of additional actions.
-      ReframeResponse(
-          effect: () => Client()
-              .get('https://jsonplaceholder.typicode.com/posts/1')
-              .then(
-                  (Response response) => [SetCountEvent(response.statusCode)]));
 }
